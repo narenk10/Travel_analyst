@@ -9,6 +9,8 @@ Travel Analyst helps travel teams understand package performance and prioritize 
 
 ## Mock UX Design
 
-[View the interactive Mock UX](./docs/mock-ux.html)
+[Open the public UX storyboard](./docs/mock-ux-flow.svg) · [Explore the interactive prototype](./docs/mock-ux.html)
 
-This interactive prototype maps the dashboard-to-decision journey: review portfolio signals, filter and compare packages, explore a recommendation, and save a next step.
+This design maps the dashboard-to-decision journey: review portfolio signals, filter and compare packages, explore an opportunity, and save a next step. The storyboard is previewable on GitHub; the prototype demonstrates the key interactions.
+
+![Travel Analyst Mock UX storyboard](./docs/mock-ux-flow.svg)
