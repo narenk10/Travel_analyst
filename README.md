@@ -11,4 +11,4 @@ Travel Analyst helps travel teams understand package performance and prioritize 
 
 [View the interactive Mock UX](./docs/mock-ux.html)
 
-This prototype maps the dashboard, package analysis, and optimization journeys. Use the navigation and package actions to explore the main screens and decision flow.
+This interactive prototype maps the dashboard-to-decision journey: review portfolio signals, filter and compare packages, explore a recommendation, and save a next step.
