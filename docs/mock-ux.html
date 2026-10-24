@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f7f5">
+  <title>Travel Analyst — UX Prototype</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172c2a;
+      --muted: #73817c;
+      --line: #e8ece8;
+      --paper: #fff;
+      --canvas: #f6f7f5;
+      --green: #167a65;
+      --green-dark: #0e5d4d;
+      --green-soft: #e8f4ef;
+      --lime: #d7ed87;
+      --orange: #c4783d;
+      --orange-soft: #fbf0e6;
+      --red: #bd5b53;
+      --red-soft: #f9ece9;
+      --shadow: 0 10px 30px rgba(29, 50, 44, .045);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--canvas); color: var(--ink); }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .app { min-height: 100vh; }
+    .sidebar {
+      position: fixed; inset: 0 auto 0 0; z-index: 3; display: flex; width: 238px;
+      flex-direction: column; border-right: 1px solid var(--line); background: var(--paper);
+      padding: 27px 16px 18px;
+    }
+    .brand { display: flex; align-items: center; gap: 11px; padding: 0 10px 32px; }
+    .brand-mark {
+      display: grid; width: 35px; height: 35px; place-items: center; border-radius: 11px;
+      background: var(--green); color: white; font-size: 17px; font-weight: 800;
+    }
+    .brand-name { font-size: 15px; font-weight: 750; letter-spacing: -.3px; }
+    .brand-caption { margin-top: 2px; color: var(--muted); font-size: 10px; }
+    .nav-label { padding: 0 11px 9px; color: #9aa59f; font-size: 9px; font-weight: 750; letter-spacing: 1.1px; text-transform: uppercase; }
+    .nav { display: grid; gap: 5px; }
+    .nav button {
+      display: flex; align-items: center; gap: 11px; width: 100%; border: 0; border-radius: 9px;
+      background: transparent; color: #63716b; padding: 10px 11px; text-align: left;
+      font-size: 12px; font-weight: 620;
+    }
+    .nav button:hover { background: #f5f8f6; color: var(--ink); }
+    .nav button.active { background: var(--green-soft); color: var(--green-dark); font-weight: 730; }
+    .nav-icon { width: 17px; text-align: center; font-size: 15px; }
+    .sidebar-bottom { margin-top: auto; border-top: 1px solid var(--line); padding: 16px 8px 0; }
+    .profile { display: flex; align-items: center; gap: 10px; }
+    .avatar { display: grid; width: 33px; height: 33px; place-items: center; border-radius: 50%; background: #edf0df; color: #65703c; font-size: 11px; font-weight: 750; }
+    .profile-name { font-size: 11px; font-weight: 700; }
+    .profile-role { margin-top: 3px; color: var(--muted); font-size: 10px; }
+    .main { max-width: 1560px; margin-left: 238px; padding: 0 42px 54px; }
+    .topbar {
+      display: flex; min-height: 75px; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--line); margin-bottom: 29px;
+    }
+    .breadcrumb { color: var(--muted); font-size: 11px; }
+    .breadcrumb strong { color: var(--ink); font-weight: 680; }
+    .top-actions { display: flex; align-items: center; gap: 12px; }
+    .period, .quiet-button, .button {
+      min-height: 36px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper);
+      color: #3e504a; padding: 0 12px; font-size: 11px; font-weight: 650;
+    }
+    .quiet-button:hover, .period:hover { border-color: #bacbc3; }
+    .button-primary { border-color: var(--green); background: var(--green); color: white; }
+    .button-primary:hover { border-color: var(--green-dark); background: var(--green-dark); }
+    .button-soft { border-color: #cfe4d9; background: var(--green-soft); color: var(--green-dark); }
+    .refresh { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 10px; }
+    .refresh-dot { width: 7px; height: 7px; border-radius: 50%; background: #62a58a; }
+    .page { display: none; }
+    .page.active { display: block; }
+    .page-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 22px; }
+    .eyebrow { margin: 0 0 7px; color: var(--green); font-size: 9px; font-weight: 760; letter-spacing: 1.3px; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(23px, 2.5vw, 29px); font-weight: 680; letter-spacing: -1.1px; }
+    .subtitle { margin: 8px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .heading-actions { display: flex; gap: 8px; }
+    .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px; margin-bottom: 15px; }
+    .card { border: 1px solid var(--line); border-radius: 11px; background: var(--paper); box-shadow: var(--shadow); }
+    .kpi { min-height: 120px; padding: 17px 18px; }
+    .kpi-top { display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: 10px; font-weight: 620; }
+    .kpi-symbol { display: grid; width: 26px; height: 26px; place-items: center; border-radius: 8px; background: var(--green-soft); color: var(--green); font-size: 12px; }
+    .kpi-value { margin-top: 14px; font-size: 23px; font-weight: 720; letter-spacing: -.8px; }
+    .kpi-change { margin-top: 5px; color: var(--green); font-size: 10px; }
+    .kpi-change span { color: var(--muted); }
+    .content-grid { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(250px, .95fr); gap: 15px; margin-bottom: 15px; }
+    .panel { padding: 18px 19px; }
+    .panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    h2 { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: -.15px; }
+    .panel-note { margin: 5px 0 0; color: var(--muted); font-size: 10px; }
+    .chart-legend { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 9px; }
+    .legend-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+    .chart-wrap { margin-top: 16px; }
+    .chart { display: block; width: 100%; height: auto; overflow: visible; }
+    .chart text { fill: #8c9992; font-family: inherit; font-size: 9px; }
+    .opportunity {
+      display: flex; flex-direction: column; min-height: 233px; justify-content: space-between;
+      background: #f2f6e8; padding: 19px; overflow: hidden; position: relative;
+    }
+    .opportunity:after { position: absolute; right: -40px; bottom: -75px; width: 170px; height: 170px; border: 1px solid rgba(95, 122, 63, .12); border-radius: 50%; content: ""; }
+    .opp-tag { display: inline-flex; align-items: center; gap: 6px; width: fit-content; border-radius: 20px; background: white; color: #637544; padding: 6px 9px; font-size: 9px; font-weight: 700; }
+    .opp-title { max-width: 245px; margin: 17px 0 7px; font-size: 17px; font-weight: 690; letter-spacing: -.4px; line-height: 1.35; }
+    .opp-copy { max-width: 255px; margin: 0; color: #69766c; font-size: 10px; line-height: 1.6; }
+    .opp-bottom { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; margin-top: 15px; }
+    .opp-value { color: #648347; font-size: 10px; }
+    .opp-value strong { display: block; margin-top: 3px; color: #38553b; font-size: 16px; }
+    .section-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 26px 0 12px; }
+    .text-link { border: 0; background: none; color: var(--green); padding: 4px 0; font-size: 10px; font-weight: 700; }
+    .text-link:hover { color: var(--green-dark); }
+    .table-card { overflow: hidden; }
+    .table-tools { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 13px 15px; border-bottom: 1px solid var(--line); }
+    .search { width: min(260px, 100%); height: 34px; border: 1px solid var(--line); border-radius: 7px; outline: 0; background: white; padding: 0 11px; color: var(--ink); font-size: 10px; }
+    .search:focus, select:focus { border-color: #78aa98; box-shadow: 0 0 0 3px rgba(22, 122, 101, .08); }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+    .filter { height: 34px; border: 1px solid var(--line); border-radius: 7px; background: white; color: #4d5d56; padding: 0 10px; font-size: 10px; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; white-space: nowrap; }
+    th { background: #fbfcfb; color: #85928b; font-size: 9px; font-weight: 720; letter-spacing: .4px; text-transform: uppercase; }
+    td { border-top: 1px solid #eff1ef; color: #40514a; font-size: 10px; }
+    th, td { padding: 12px 14px; }
+    .package-name { color: var(--ink); font-weight: 700; }
+    .package-region { margin-top: 4px; color: var(--muted); font-size: 9px; }
+    .score { display: inline-flex; min-width: 36px; justify-content: center; border-radius: 6px; background: var(--green-soft); color: var(--green-dark); padding: 5px 7px; font-weight: 750; }
+    .trend { color: var(--green); font-weight: 650; }
+    .trend.down { color: var(--red); }
+    .table-action { border: 0; background: none; color: var(--green); padding: 4px 0; font-size: 10px; font-weight: 700; }
+    .table-action:hover { text-decoration: underline; }
+    .empty-row { padding: 22px; color: var(--muted); text-align: center; }
+    .insight-list { display: grid; gap: 10px; margin-top: 17px; }
+    .insight-item { display: grid; grid-template-columns: 30px 1fr auto; align-items: center; gap: 10px; border-bottom: 1px solid #eef1ed; padding: 0 0 10px; }
+    .insight-item:last-child { border: 0; padding-bottom: 0; }
+    .insight-index { display: grid; width: 28px; height: 28px; place-items: center; border-radius: 8px; background: #f3f5ed; color: #68774c; font-size: 10px; font-weight: 750; }
+    .insight-title { font-size: 10px; font-weight: 700; }
+    .insight-sub { margin-top: 4px; color: var(--muted); font-size: 9px; }
+    .insight-uplift { color: var(--green); font-size: 10px; font-weight: 750; }
+    .filter-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .toolbar-label { margin-right: 2px; color: var(--muted); font-size: 10px; align-self: center; }
+    .package-full-table td { padding-top: 14px; padding-bottom: 14px; }
+    .detail-back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 20px; border: 0; background: none; color: var(--muted); padding: 0; font-size: 10px; font-weight: 650; }
+    .detail-back:hover { color: var(--green); }
+    .detail-hero { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 21px; }
+    .detail-category { display: inline-flex; border-radius: 20px; background: var(--green-soft); color: var(--green-dark); padding: 6px 9px; font-size: 9px; font-weight: 700; }
+    .detail-title { margin-top: 11px; }
+    .detail-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 15px; }
+    .detail-stat { padding: 15px; }
+    .detail-stat span { color: var(--muted); font-size: 9px; }
+    .detail-stat strong { display: block; margin-top: 9px; font-size: 18px; font-weight: 700; }
+    .detail-layout { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(260px, .8fr); gap: 15px; }
+    .recommendation { border-left: 3px solid #9aaf5b; background: #f5f7ed; padding: 15px; }
+    .recommendation h3 { margin: 0 0 7px; color: #4c603f; font-size: 11px; }
+    .recommendation p { margin: 0; color: #657164; font-size: 10px; line-height: 1.65; }
+    .recommendation-value { margin-top: 12px; color: #557443; font-size: 10px; font-weight: 700; }
+    .status-row { display: flex; justify-content: space-between; border-bottom: 1px solid #eef1ef; padding: 11px 0; color: var(--muted); font-size: 10px; }
+    .status-row:last-child { border-bottom: 0; }
+    .status-row strong { color: var(--ink); font-size: 10px; font-weight: 700; }
+    .toast {
+      position: fixed; right: 23px; bottom: 22px; z-index: 5; max-width: min(370px, calc(100vw - 32px));
+      transform: translateY(15px); border-radius: 9px; background: #193b32; box-shadow: 0 12px 28px rgba(16, 43, 34, .2);
+      color: white; opacity: 0; padding: 12px 16px; pointer-events: none; font-size: 11px; transition: opacity .2s, transform .2s;
+    }
+    .toast.visible { transform: translateY(0); opacity: 1; }
+    [hidden] { display: none !important; }
+
+    @media (max-width: 1050px) {
+      .main { padding-right: 25px; padding-left: 25px; }
+      .sidebar { width: 205px; }
+      .main { margin-left: 205px; }
+      .content-grid { grid-template-columns: minmax(0, 1.35fr) minmax(220px, .9fr); }
+      .kpis { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 720px) {
+      .sidebar { position: sticky; inset: 0 0 auto; width: 100%; height: auto; padding: 11px 13px 9px; border-right: 0; border-bottom: 1px solid var(--line); }
+      .brand { padding: 0 3px 10px; }
+      .brand-mark { width: 31px; height: 31px; }
+      .nav-label, .sidebar-bottom { display: none; }
+      .nav { display: flex; gap: 4px; overflow-x: auto; }
+      .nav button { width: auto; flex: 0 0 auto; gap: 6px; padding: 8px 9px; font-size: 10px; }
+      .nav-icon { font-size: 13px; }
+      .main { margin: 0; padding: 0 15px 36px; }
+      .topbar { min-height: 53px; margin-bottom: 21px; }
+      .refresh { display: none; }
+      .top-actions { gap: 6px; }
+      .period, .quiet-button, .button { min-height: 33px; padding: 0 9px; font-size: 10px; }
+      .page-heading { align-items: flex-start; flex-direction: column; }
+      .content-grid, .detail-layout { grid-template-columns: 1fr; }
+      .kpis { gap: 9px; }
+      .kpi { min-height: 107px; padding: 13px; }
+      .kpi-value { font-size: 20px; }
+      .panel { padding: 15px; }
+      .detail-stats { grid-template-columns: repeat(2, 1fr); gap: 9px; }
+      .detail-hero { flex-direction: column; }
+      .detail-hero .heading-actions { width: 100%; }
+      .table-tools { align-items: flex-start; flex-direction: column; }
+      .search { width: 100%; }
+    }
+    @media (max-width: 390px) {
+      .nav button { gap: 4px; padding: 8px 7px; }
+      .nav-icon { display: none; }
+      .kpi-top { font-size: 9px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="Main navigation">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">W</div>
+        <div><div class="brand-name">Waypoint</div><div class="brand-caption">Travel product intelligence</div></div>
+      </div>
+      <div class="nav-label">Workspace</div>
+      <nav class="nav">
+        <button class="active" type="button" data-screen="overview"><span class="nav-icon" aria-hidden="true">◫</span>Overview</button>
+        <button type="button" data-screen="packages"><span class="nav-icon" aria-hidden="true">⌑</span>Packages <span id="package-count"></span></button>
+        <button type="button" data-screen="opportunities"><span class="nav-icon" aria-hidden="true">✳</span>Opportunities <span class="nav-count">3</span></button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="profile">
+          <div class="avatar" aria-hidden="true">AM</div>
+          <div><div class="profile-name">Aarav Mehta</div><div class="profile-role">Product manager</div></div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="breadcrumb"><span>Workspace</span> &nbsp;/&nbsp; <strong id="breadcrumb-current">Overview</strong></div>
+        <div class="top-actions">
+          <div class="refresh"><span class="refresh-dot" aria-hidden="true"></span>Updated 5 min ago</div>
+          <select class="period" id="period" aria-label="Reporting period">
+            <option>Last 30 days</option><option>Last 90 days</option><option>This year</option>
+          </select>
+          <button class="quiet-button" id="export-button" type="button">↥ Export</button>
+        </div>
+      </header>
+
+      <section class="page active" id="screen-overview" aria-labelledby="overview-title">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">Portfolio overview</p>
+            <h1 id="overview-title">Good morning, Aarav</h1>
+            <p class="subtitle">A clear view of how your travel portfolio is performing.</p>
+          </div>
+          <div class="heading-actions"><button class="button button-primary" type="button" data-screen="opportunities">View recommendations <span aria-hidden="true">→</span></button></div>
+        </div>
+
+        <div class="kpis">
+          <article class="card kpi"><div class="kpi-top"><span>Portfolio revenue</span><span class="kpi-symbol" aria-hidden="true">₹</span></div><div class="kpi-value">₹2.30 Cr</div><div class="kpi-change">↑ 12.8% <span>vs. previous period</span></div></article>
+          <article class="card kpi"><div class="kpi-top"><span>Total bookings</span><span class="kpi-symbol" aria-hidden="true">↗</span></div><div class="kpi-value">2,310</div><div class="kpi-change">↑ 8.4% <span>vs. previous period</span></div></article>
+          <article class="card kpi"><div class="kpi-top"><span>Avg. satisfaction</span><span class="kpi-symbol" aria-hidden="true">♡</span></div><div class="kpi-value">4.63 <span style="font-size:13px;color:#89958f">/ 5</span></div><div class="kpi-change">↑ 0.2 <span>vs. previous period</span></div></article>
+          <article class="card kpi"><div class="kpi-top"><span>Avg. conversion</span><span class="kpi-symbol" aria-hidden="true">◎</span></div><div class="kpi-value">17.4%</div><div class="kpi-change">↑ 1.6% <span>vs. previous period</span></div></article>
+        </div>
+
+        <div class="content-grid">
+          <section class="card panel" aria-labelledby="revenue-title">
+            <div class="panel-heading"><div><h2 id="revenue-title">Revenue over time</h2><p class="panel-note">Monthly revenue across all active packages</p></div><div class="chart-legend"><span class="legend-dot"></span>Revenue</div></div>
+            <div class="chart-wrap">
+              <svg class="chart" viewBox="0 0 590 174" role="img" aria-label="Revenue trend rises through the year from 12 to 31 lakh rupees">
+                <defs><linearGradient id="fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#6db49d" stop-opacity=".22"/><stop offset="1" stop-color="#6db49d" stop-opacity="0"/></linearGradient></defs>
+                <line x1="39" y1="28" x2="575" y2="28" stroke="#eef1ee"/><line x1="39" y1="70" x2="575" y2="70" stroke="#eef1ee"/><line x1="39" y1="112" x2="575" y2="112" stroke="#eef1ee"/>
+                <text x="0" y="31">₹30L</text><text x="0" y="73">₹20L</text><text x="0" y="115">₹10L</text>
+                <path d="M48,117 C78,105 91,92 122,98 S168,85 194,87 S243,63 267,72 S318,63 341,66 S390,43 414,52 S466,35 487,42 S540,28 565,25 L565,137 L48,137Z" fill="url(#fill)"/>
+                <path d="M48,117 C78,105 91,92 122,98 S168,85 194,87 S243,63 267,72 S318,63 341,66 S390,43 414,52 S466,35 487,42 S540,28 565,25" fill="none" stroke="#25846d" stroke-width="2.5" stroke-linecap="round"/>
+                <circle cx="565" cy="25" r="4" fill="#25846d" stroke="white" stroke-width="2"/>
+                <text x="43" y="158">Jan</text><text x="135" y="158">Mar</text><text x="228" y="158">May</text><text x="322" y="158">Jul</text><text x="415" y="158">Sep</text><text x="516" y="158">Nov</text>
+              </svg>
+            </div>
+          </section>
+          <section class="card opportunity" aria-labelledby="opportunity-title">
+            <div>
+              <span class="opp-tag">✦ &nbsp;TOP OPPORTUNITY</span>
+              <h2 class="opp-title" id="opportunity-title">A small change with room to grow</h2>
+              <p class="opp-copy">Himalayan Trek has strong guest feedback, but fewer visitors are booking. Explore a pricing and visibility test.</p>
+            </div>
+            <div class="opp-bottom">
+              <div class="opp-value">Estimated monthly upside<strong>+₹4.2L</strong></div>
+              <button class="button button-primary" type="button" data-package="Himalayan Trek">Explore <span aria-hidden="true">→</span></button>
+            </div>
+          </section>
+        </div>
+
+        <div class="section-row"><h2>Package performance</h2><button class="text-link" type="button" data-screen="packages">View all packages →</button></div>
+        <section class="card table-card" aria-label="Top travel packages by value score">
+          <div class="table-wrap"><table><thead><tr><th>Package</th><th>Value score</th><th>Revenue</th><th>Bookings</th><th>Satisfaction</th><th>Trend</th><th></th></tr></thead><tbody id="overview-rows"></tbody></table></div>
+        </section>
+      </section>
+
+      <section class="page" id="screen-packages" aria-labelledby="packages-title">
+        <div class="page-heading">
+          <div><p class="eyebrow">Explore your portfolio</p><h1 id="packages-title">Travel packages</h1><p class="subtitle">Compare performance, find patterns, and open a package to see what to improve.</p></div>
+          <div class="heading-actions"><button class="button button-primary" id="compare-button" type="button">Compare selected <span id="selected-count">0</span></button></div>
+        </div>
+        <div class="section-row" style="margin-top:0"><h2>All packages <span id="all-count" style="color:#8b9790;font-size:10px;font-weight:500"></span></h2></div>
+        <section class="card table-card" aria-label="Searchable and filterable package performance table">
+          <div class="table-tools">
+            <input class="search" id="package-search" type="search" placeholder="⌕  Search packages or regions" aria-label="Search packages or regions">
+            <div class="filter-row"><span class="toolbar-label">Filter:</span><select class="filter" id="region-filter" aria-label="Filter packages by region"><option value="">All regions</option><option>Goa</option><option>Kerala</option><option>Jammu &amp; Kashmir</option><option>Rajasthan</option><option>Himachal Pradesh</option></select></div>
+          </div>
+          <div class="table-wrap"><table class="package-full-table"><thead><tr><th><span class="sr-only">Select</span></th><th>Package</th><th>Value score</th><th>Revenue</th><th>Bookings</th><th>Conversion</th><th>Satisfaction</th><th>Trend</th><th></th></tr></thead><tbody id="package-rows"></tbody></table></div>
+        </section>
+        <p class="subtitle" style="font-size:10px;margin-top:11px">Select packages to compare side by side, or open a package for a detailed performance view.</p>
+      </section>
+
+      <section class="page" id="screen-opportunities" aria-labelledby="opportunities-title">
+        <div class="page-heading">
+          <div><p class="eyebrow">Decide what to do next</p><h1 id="opportunities-title">Growth opportunities</h1><p class="subtitle">Prioritized ideas turn package signals into practical next steps.</p></div>
+        </div>
+        <section class="card panel" aria-label="Prioritized product recommendations">
+          <div class="panel-heading"><div><h2>Recommended actions</h2><p class="panel-note">Ranked by potential business impact and customer signal.</p></div><span class="opp-tag">3 IDEAS</span></div>
+          <div class="insight-list" id="opportunity-list"></div>
+        </section>
+        <section class="card panel" style="margin-top:15px">
+          <div class="panel-heading"><div><h2>How priorities are chosen</h2><p class="panel-note">Each recommendation balances customer experience with commercial potential.</p></div></div>
+          <div class="content-grid" style="margin:18px 0 0;grid-template-columns:repeat(3,1fr)">
+            <div><div class="insight-index">01</div><h2 style="margin-top:10px">Spot a signal</h2><p class="panel-note" style="line-height:1.65">Find packages where conversion, satisfaction, or demand tell different stories.</p></div>
+            <div><div class="insight-index">02</div><h2 style="margin-top:10px">Estimate impact</h2><p class="panel-note" style="line-height:1.65">Compare the expected revenue lift with current bookings and package value.</p></div>
+            <div><div class="insight-index">03</div><h2 style="margin-top:10px">Take a next step</h2><p class="panel-note" style="line-height:1.65">Review the package details, then save an idea for your team's action list.</p></div>
+          </div>
+        </section>
+      </section>
+
+      <section class="page" id="screen-detail" aria-labelledby="detail-title">
+        <button class="detail-back" id="detail-back" type="button">← &nbsp;Back to packages</button>
+        <div class="detail-hero">
+          <div><span class="detail-category" id="detail-category"></span><h1 class="detail-title" id="detail-title">Package details</h1><p class="subtitle" id="detail-region"></p></div>
+          <div class="heading-actions"><button class="button button-soft" id="save-action" type="button">＋ Save to action list</button><button class="button" id="detail-share" type="button">Share insight</button></div>
+        </div>
+        <div class="detail-stats" id="detail-stats"></div>
+        <div class="detail-layout">
+          <section class="card panel"><div class="panel-heading"><div><h2>Performance snapshot</h2><p class="panel-note">A quick read on what is going well and where to focus.</p></div></div><div id="detail-performance" style="margin-top:12px"></div></section>
+          <section class="card panel"><div class="panel-heading"><div><h2>Suggested next step</h2><p class="panel-note">A starting point for your team to validate.</p></div></div><div class="recommendation" id="detail-recommendation" style="margin-top:15px"></div></section>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const packages = [
+      { name: "Goa Beach Retreat", region: "Goa", category: "Beach", price: 18999, occupancy: 88, satisfaction: 4.7, bookings: 540, revenue: 3380000, conversion: 18.4, nps: 74, profitability: 32, risk: "Low", trend: "Rising", score: 92, upside: 1.8, idea: "Test a weekend add-on to increase the value of an already popular escape." },
+      { name: "Kerala Backwaters", region: "Kerala", category: "Wellness", price: 24999, occupancy: 84, satisfaction: 4.9, bookings: 430, revenue: 4140000, conversion: 17.8, nps: 81, profitability: 36, risk: "Low", trend: "Rising", score: 96, upside: 3.4, idea: "Highlight guest-loved wellness experiences earlier in the booking journey." },
+      { name: "Kashmir Valley", region: "Jammu & Kashmir", category: "Nature", price: 32999, occupancy: 79, satisfaction: 4.8, bookings: 360, revenue: 3920000, conversion: 16.9, nps: 77, profitability: 34, risk: "Medium", trend: "Stable", score: 88, upside: 2.6, idea: "Clarify seasonal inclusions to help high-intent travelers convert." },
+      { name: "Jaipur Heritage", region: "Rajasthan", category: "Culture", price: 21999, occupancy: 76, satisfaction: 4.6, bookings: 390, revenue: 3810000, conversion: 17.2, nps: 69, profitability: 29, risk: "Medium", trend: "Stable", score: 84, upside: 2.1, idea: "Refresh cultural highlights and review package margin before the next season." },
+      { name: "Himalayan Trek", region: "Himachal Pradesh", category: "Adventure", price: 27999, occupancy: 72, satisfaction: 4.5, bookings: 280, revenue: 3590000, conversion: 14.8, nps: 66, profitability: 28, risk: "Medium", trend: "Declining", score: 71, upside: 4.2, idea: "Test clearer difficulty details and targeted visibility to reduce booking hesitation." },
+      { name: "Srinagar Houseboat", region: "Jammu & Kashmir", category: "Luxury", price: 34999, occupancy: 91, satisfaction: 4.3, bookings: 310, revenue: 4150000, conversion: 19.1, nps: 62, profitability: 33, risk: "Low", trend: "Rising", score: 89, upside: 2.9, idea: "Review guest feedback and add service details to support its high conversion." }
+    ];
+    const screenNames = { overview: "Overview", packages: "Travel packages", opportunities: "Growth opportunities", detail: "Package details" };
+    const selected = new Set();
+    const savedActions = new Set();
+    let currentPackage = packages[4];
+    let previousScreen = "overview";
+    let toastTimer;
+
+    function currency(value) {
+      return "₹" + new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(value);
+    }
+    function revenue(value) {
+      return "₹" + (value / 100000).toFixed(1) + "L";
+    }
+    function rowMarkup(item, full) {
+      const trendClass = item.trend === "Declining" ? "trend down" : "trend";
+      return `<tr>
+        ${full ? `<td><input type="checkbox" aria-label="Select ${item.name} for comparison" data-select="${item.name}" ${selected.has(item.name) ? "checked" : ""}></td>` : ""}
+        <td><div class="package-name">${item.name}</div><div class="package-region">${item.region} · ${item.category}</div></td>
+        <td><span class="score">${item.score}</span></td><td>${revenue(item.revenue)}</td><td>${item.bookings}</td>
+        ${full ? `<td>${item.conversion}%</td>` : ""}<td>${item.satisfaction.toFixed(1)} / 5</td><td class="${trendClass}">${item.trend === "Rising" ? "↗" : item.trend === "Declining" ? "↘" : "→"} ${item.trend}</td>
+        <td><button class="table-action" type="button" data-package="${item.name}">View →</button></td></tr>`;
+    }
+    function renderTables() {
+      document.getElementById("overview-rows").innerHTML = [...packages].sort((a, b) => b.score - a.score).slice(0, 4).map((item) => rowMarkup(item, false)).join("");
+      const query = document.getElementById("package-search").value.trim().toLowerCase();
+      const region = document.getElementById("region-filter").value;
+      const filtered = packages.filter((item) => (!query || `${item.name} ${item.region} ${item.category}`.toLowerCase().includes(query)) && (!region || item.region === region));
+      document.getElementById("package-rows").innerHTML = filtered.length ? filtered.map((item) => rowMarkup(item, true)).join("") : `<tr><td class="empty-row" colspan="9">No packages match those filters. Try another search or region.</td></tr>`;
+      document.getElementById("all-count").textContent = `(${filtered.length})`;
+      document.getElementById("package-count").textContent = packages.length;
+      document.getElementById("selected-count").textContent = selected.size;
+    }
+    function renderOpportunities() {
+      const ordered = [...packages].sort((a, b) => b.upside - a.upside).slice(0, 3);
+      document.getElementById("opportunity-list").innerHTML = ordered.map((item, index) => `
+        <div class="insight-item"><div class="insight-index">0${index + 1}</div>
+          <div><div class="insight-title">${item.name}</div><div class="insight-sub">${item.idea}</div></div>
+          <div style="text-align:right"><div class="insight-uplift">+${currency(item.upside * 100000)}</div>
+          <button class="table-action" type="button" data-package="${item.name}">Review idea →</button></div>
+        </div>`).join("");
+    }
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("visible");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("visible"), 2600);
+    }
+    function goTo(screen) {
+      document.querySelectorAll(".page").forEach((page) => page.classList.remove("active"));
+      const page = document.getElementById(`screen-${screen}`);
+      if (page) page.classList.add("active");
+      document.querySelectorAll(".nav button[data-screen]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.screen === screen || (screen === "detail" && button.dataset.screen === "packages"));
+      });
+      document.getElementById("breadcrumb-current").textContent = screenNames[screen] || screenNames.overview;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    function openPackage(name) {
+      const item = packages.find((entry) => entry.name === name);
+      if (!item) return;
+      currentPackage = item;
+      previousScreen = document.getElementById("screen-opportunities").classList.contains("active") ? "opportunities" : "packages";
+      document.getElementById("detail-title").textContent = item.name;
+      document.getElementById("detail-category").textContent = item.category;
+      document.getElementById("detail-region").textContent = `${item.region} · Package performance and product signals`;
+      document.getElementById("detail-stats").innerHTML = [
+        ["Revenue", revenue(item.revenue)], ["Bookings", new Intl.NumberFormat("en-IN").format(item.bookings)],
+        ["Conversion", `${item.conversion}%`], ["Value score", `${item.score} / 100`]
+      ].map(([label, value]) => `<article class="card detail-stat"><span>${label}</span><strong>${value}</strong></article>`).join("");
+      document.getElementById("detail-performance").innerHTML = [
+        ["Guest satisfaction", `${item.satisfaction.toFixed(1)} / 5`], ["Occupancy", `${item.occupancy}%`],
+        ["Net promoter score", item.nps], ["Profitability", `${item.profitability}%`], ["Demand trend", item.trend], ["Risk indicator", item.risk]
+      ].map(([label, value]) => `<div class="status-row"><span>${label}</span><strong>${value}</strong></div>`).join("");
+      document.getElementById("detail-recommendation").innerHTML = `<h3>Opportunity to explore</h3><p>${item.idea}</p><div class="recommendation-value">Estimated monthly upside: +${currency(item.upside * 100000)}</div>`;
+      document.getElementById("save-action").textContent = savedActions.has(item.name) ? "✓ Saved to action list" : "＋ Save to action list";
+      goTo("detail");
+    }
+
+    document.querySelectorAll("[data-screen]").forEach((button) => button.addEventListener("click", () => goTo(button.dataset.screen)));
+    document.addEventListener("click", (event) => {
+      const packageButton = event.target.closest("[data-package]");
+      if (packageButton) openPackage(packageButton.dataset.package);
+    });
+    document.getElementById("package-search").addEventListener("input", renderTables);
+    document.getElementById("region-filter").addEventListener("change", renderTables);
+    document.getElementById("package-rows").addEventListener("change", (event) => {
+      const checkbox = event.target.closest("[data-select]");
+      if (!checkbox) return;
+      checkbox.checked ? selected.add(checkbox.dataset.select) : selected.delete(checkbox.dataset.select);
+      document.getElementById("selected-count").textContent = selected.size;
+    });
+    document.getElementById("compare-button").addEventListener("click", () => {
+      showToast(selected.size < 2 ? "Select at least two packages to compare." : `Comparison ready for ${selected.size} selected packages.`);
+    });
+    document.getElementById("detail-back").addEventListener("click", () => goTo(previousScreen));
+    document.getElementById("save-action").addEventListener("click", () => {
+      if (savedActions.has(currentPackage.name)) {
+        showToast(`${currentPackage.name} is already on your action list.`);
+      } else {
+        savedActions.add(currentPackage.name);
+        document.getElementById("save-action").textContent = "✓ Saved to action list";
+        showToast(`${currentPackage.name} saved. Your team can review this next step.`);
+      }
+    });
+    document.getElementById("detail-share").addEventListener("click", () => showToast(`Shareable insight prepared for ${currentPackage.name}.`));
+    document.getElementById("export-button").addEventListener("click", () => showToast("Your portfolio summary is ready to export."));
+    document.getElementById("period").addEventListener("change", (event) => showToast(`Showing the ${event.target.value.toLowerCase()} view.`));
+    renderTables();
+    renderOpportunities();
+  </script>
+</body>
+</html>
