@@ -1,121 +1,122 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
+import { useMemo, useState } from 'react'
+import MetricCard from './components/MetricCard.jsx'
+import Navigation from './components/Navigation.jsx'
+import OpportunityList from './components/OpportunityList.jsx'
+import PackageTable from './components/PackageTable.jsx'
+import RevenueChart from './components/RevenueChart.jsx'
+import { metrics, opportunities, packages, revenue } from './data.js'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [activePage, setActivePage] = useState('Overview')
+  const [search, setSearch] = useState('')
+  const [region, setRegion] = useState('All regions')
+  const [plannedOpportunities, setPlannedOpportunities] = useState([])
+  const [selectedPackage, setSelectedPackage] = useState(null)
+
+  const filteredPackages = useMemo(
+    () =>
+      packages.filter((item) => {
+        const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase())
+        const matchesRegion = region === 'All regions' || item.region === region
+        return matchesSearch && matchesRegion
+      }),
+    [region, search],
+  )
+
+  const navigateTo = (page) => {
+    setActivePage(page)
+    document.getElementById(page.toLowerCase())?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  const togglePlanned = (id) => {
+    setPlannedOpportunities((current) =>
+      current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
+    )
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="app-shell">
+      <Navigation activePage={activePage} onNavigate={navigateTo} />
+      <main className="main-content">
+        <header className="topbar">
+          <div className="breadcrumb">Workspace <span>/</span> Travel analytics</div>
+          <div className="user-profile">
+            <span className="status-dot" aria-hidden="true" />
+            <span>All systems operational</span>
+            <span className="avatar" aria-label="Naren">N</span>
+          </div>
+        </header>
 
-      <div className="ticks"></div>
+        <section className="page-content" id="overview">
+          <div className="page-heading">
+            <div>
+              <p className="eyebrow">MONDAY, 26 OCTOBER 2026</p>
+              <h1>Good morning, Naren <span aria-hidden="true">✦</span></h1>
+              <p className="subtitle">Here&apos;s how your travel portfolio is performing this month.</p>
+            </div>
+            <button className="button button-primary" onClick={() => navigateTo('Opportunities')} type="button">
+              View recommendations <span aria-hidden="true">→</span>
+            </button>
+          </div>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+          <section className="metric-grid" aria-label="Portfolio summary">
+            {metrics.map((metric) => <MetricCard key={metric.label} {...metric} />)}
+          </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+          <div className="analytics-grid">
+            <RevenueChart data={revenue} />
+            <section className="panel opportunity-panel" id="opportunities" aria-labelledby="opportunity-heading">
+              <div className="panel-heading">
+                <div>
+                  <p className="eyebrow">YOUR NEXT BEST MOVE</p>
+                  <h2 id="opportunity-heading">Growth opportunities</h2>
+                </div>
+                <span className="count-badge">{opportunities.length}</span>
+              </div>
+              <OpportunityList
+                items={opportunities}
+                planned={plannedOpportunities}
+                onTogglePlanned={togglePlanned}
+              />
+            </section>
+          </div>
+
+          <PackageTable
+            items={filteredPackages}
+            search={search}
+            region={region}
+            onSearch={setSearch}
+            onRegionChange={setRegion}
+            onSelect={setSelectedPackage}
+          />
+          <footer className="footer-note">Travel Analyst <span>·</span> Insights for better journeys</footer>
+        </section>
+      </main>
+
+      {selectedPackage && (
+        <div className="modal-backdrop" onClick={() => setSelectedPackage(null)} role="presentation">
+          <section
+            className="package-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="package-modal-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button className="modal-close" type="button" onClick={() => setSelectedPackage(null)} aria-label="Close details">×</button>
+            <p className="eyebrow">{selectedPackage.region} · PACKAGE DETAILS</p>
+            <h2 id="package-modal-title">{selectedPackage.name}</h2>
+            <p className="subtitle">A quick look at the current package signals.</p>
+            <div className="detail-grid">
+              <div><span>Bookings</span><strong>{selectedPackage.bookings}</strong></div>
+              <div><span>Revenue</span><strong>{selectedPackage.revenue}</strong></div>
+              <div><span>Satisfaction</span><strong>{selectedPackage.satisfaction} / 5</strong></div>
+              <div><span>Value score</span><strong>{selectedPackage.score} / 100</strong></div>
+            </div>
+          </section>
+        </div>
+      )}
+    </div>
   )
 }
 
