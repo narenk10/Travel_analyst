@@ -5,9 +5,13 @@
   "type": "module",
   "description": "Mongoose models for travel package analytics",
   "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
     "test": "node --test"
   },
   "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
     "mongoose": "^8.19.1"
   }
 }
