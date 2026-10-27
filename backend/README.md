@@ -20,7 +20,9 @@ The server connects to MongoDB before listening on `PORT` (default `5000`). The 
 
 - `GET /api/health` — confirms the API is running after the database connection succeeds.
 - `GET /api/overview` — aggregates revenue, bookings, satisfaction, conversion, and package count.
-- `GET /api/packages` and `POST /api/packages` — list and create travel packages.
-- `GET /api/bookings` and `POST /api/bookings` — list and create bookings; booking creation verifies that its package exists.
+- `GET /api/packages` and `GET /api/packages/:id` — list packages or read one package by ID.
+- `POST /api/packages` — create a travel package.
+- `GET /api/bookings` and `GET /api/bookings/:id` — list bookings or read one booking by ID, including its populated package.
+- `POST /api/bookings` — create a booking after verifying that its package exists.
 
 The API validates writes through the Mongoose schemas and returns validation errors as HTTP 400 responses. Keep your actual connection string in an environment variable; do not commit it.

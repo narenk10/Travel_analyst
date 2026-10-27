@@ -76,6 +76,44 @@ test('GET /api/packages reads records from the package model', async () => {
   })
 })
 
+test('GET /api/packages/:id reads one package from the package model', async () => {
+  const travelPackage = { _id: 'package-1', name: 'Coastal Escape' }
+  let requestedId
+  const app = createApp({
+    TravelPackageModel: {
+      findById(id) {
+        requestedId = id
+        return createQuery(travelPackage)
+      },
+    },
+  })
+
+  await withServer(app, async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/api/packages/package-1`)
+
+    assert.equal(response.status, 200)
+    assert.deepEqual(await response.json(), travelPackage)
+    assert.equal(requestedId, 'package-1')
+  })
+})
+
+test('GET /api/packages/:id returns 404 when the package does not exist', async () => {
+  const app = createApp({
+    TravelPackageModel: {
+      findById() {
+        return createQuery(null)
+      },
+    },
+  })
+
+  await withServer(app, async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/api/packages/missing-package`)
+
+    assert.equal(response.status, 404)
+    assert.deepEqual(await response.json(), { error: 'Travel package not found' })
+  })
+})
+
 test('POST /api/packages writes a record using the model', async () => {
   const input = { name: 'Coastal Escape', region: 'Goa' }
   const app = createApp({
@@ -95,6 +133,55 @@ test('POST /api/packages writes a record using the model', async () => {
 
     assert.equal(response.status, 201)
     assert.deepEqual(await response.json(), { _id: 'package-1', ...input })
+  })
+})
+
+test('GET /api/bookings/:id reads one booking and populates its package', async () => {
+  const booking = { _id: 'booking-1', package: { name: 'Coastal Escape' } }
+  let requestedId
+  let populatedField
+  const app = createApp({
+    BookingModel: {
+      findById(id) {
+        requestedId = id
+        return {
+          populate(field) {
+            populatedField = field
+            return createQuery(booking)
+          },
+        }
+      },
+    },
+  })
+
+  await withServer(app, async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/api/bookings/booking-1`)
+
+    assert.equal(response.status, 200)
+    assert.deepEqual(await response.json(), booking)
+    assert.equal(requestedId, 'booking-1')
+    assert.equal(populatedField, 'package')
+  })
+})
+
+test('GET /api/bookings/:id returns 404 when the booking does not exist', async () => {
+  const app = createApp({
+    BookingModel: {
+      findById() {
+        return {
+          populate() {
+            return createQuery(null)
+          },
+        }
+      },
+    },
+  })
+
+  await withServer(app, async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/api/bookings/missing-booking`)
+
+    assert.equal(response.status, 404)
+    assert.deepEqual(await response.json(), { error: 'Booking not found' })
   })
 })
 
