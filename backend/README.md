@@ -22,7 +22,9 @@ The server connects to MongoDB before listening on `PORT` (default `5000`). The 
 - `GET /api/overview` — aggregates revenue, bookings, satisfaction, conversion, and package count.
 - `GET /api/packages` and `GET /api/packages/:id` — list packages or read one package by ID.
 - `POST /api/packages` — create a travel package.
+- `PUT /api/packages/:id` — update a package by ID with schema validation.
 - `GET /api/bookings` and `GET /api/bookings/:id` — list bookings or read one booking by ID, including its populated package.
 - `POST /api/bookings` — create a booking after verifying that its package exists.
+- `PUT /api/bookings/:id` — update a booking by ID with schema validation and package-reference checks.
 
 The API validates writes through the Mongoose schemas and returns validation errors as HTTP 400 responses. Keep your actual connection string in an environment variable; do not commit it.

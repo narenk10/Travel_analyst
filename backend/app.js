@@ -90,6 +90,22 @@ export function createApp({
     }),
   )
 
+  app.put(
+    '/api/packages/:id',
+    asyncHandler(async (req, res) => {
+      const travelPackage = await TravelPackageModel.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        { new: true, runValidators: true },
+      ).lean()
+      if (!travelPackage) {
+        return res.status(404).json({ error: 'Travel package not found' })
+      }
+
+      res.json(travelPackage)
+    }),
+  )
+
   app.get(
     '/api/bookings',
     asyncHandler(async (_req, res) => {
@@ -123,6 +139,31 @@ export function createApp({
 
       const booking = await BookingModel.create(req.body)
       res.status(201).json(booking)
+    }),
+  )
+
+  app.put(
+    '/api/bookings/:id',
+    asyncHandler(async (req, res) => {
+      if (req.body.package !== undefined) {
+        const travelPackage = await TravelPackageModel.exists({ _id: req.body.package })
+        if (!travelPackage) {
+          return res.status(404).json({ error: 'Travel package not found' })
+        }
+      }
+
+      const booking = await BookingModel.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        { new: true, runValidators: true },
+      )
+        .populate('package')
+        .lean()
+      if (!booking) {
+        return res.status(404).json({ error: 'Booking not found' })
+      }
+
+      res.json(booking)
     }),
   )
 
