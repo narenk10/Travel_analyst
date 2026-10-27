@@ -70,6 +70,18 @@ export function createApp({
     }),
   )
 
+  app.get(
+    '/api/packages/:id',
+    asyncHandler(async (req, res) => {
+      const travelPackage = await TravelPackageModel.findById(req.params.id).lean()
+      if (!travelPackage) {
+        return res.status(404).json({ error: 'Travel package not found' })
+      }
+
+      res.json(travelPackage)
+    }),
+  )
+
   app.post(
     '/api/packages',
     asyncHandler(async (req, res) => {
@@ -86,6 +98,18 @@ export function createApp({
         .sort({ createdAt: -1 })
         .lean()
       res.json(bookings)
+    }),
+  )
+
+  app.get(
+    '/api/bookings/:id',
+    asyncHandler(async (req, res) => {
+      const booking = await BookingModel.findById(req.params.id).populate('package').lean()
+      if (!booking) {
+        return res.status(404).json({ error: 'Booking not found' })
+      }
+
+      res.json(booking)
     }),
   )
 
