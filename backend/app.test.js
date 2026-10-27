@@ -136,6 +136,57 @@ test('POST /api/packages writes a record using the model', async () => {
   })
 })
 
+test('PUT /api/packages/:id updates a package with validators enabled', async () => {
+  const input = { name: 'Coastal Escape II', region: 'Goa' }
+  const updatedPackage = { _id: 'package-1', ...input }
+  let updateArguments
+  const app = createApp({
+    TravelPackageModel: {
+      findByIdAndUpdate(...args) {
+        updateArguments = args
+        return createQuery(updatedPackage)
+      },
+    },
+  })
+
+  await withServer(app, async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/api/packages/package-1`, {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(input),
+    })
+
+    assert.equal(response.status, 200)
+    assert.deepEqual(await response.json(), updatedPackage)
+    assert.deepEqual(updateArguments, [
+      'package-1',
+      input,
+      { new: true, runValidators: true },
+    ])
+  })
+})
+
+test('PUT /api/packages/:id returns 404 when the package does not exist', async () => {
+  const app = createApp({
+    TravelPackageModel: {
+      findByIdAndUpdate() {
+        return createQuery(null)
+      },
+    },
+  })
+
+  await withServer(app, async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/api/packages/missing-package`, {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: 'Coastal Escape II' }),
+    })
+
+    assert.equal(response.status, 404)
+    assert.deepEqual(await response.json(), { error: 'Travel package not found' })
+  })
+})
+
 test('GET /api/bookings/:id reads one booking and populates its package', async () => {
   const booking = { _id: 'booking-1', package: { name: 'Coastal Escape' } }
   let requestedId
@@ -243,6 +294,105 @@ test('POST /api/bookings writes a booking after confirming the package exists', 
     assert.deepEqual(await response.json(), { _id: 'booking-1', ...input })
     assert.equal(checkedPackageId, input.package)
     assert.deepEqual(createdBooking, input)
+  })
+})
+
+test('PUT /api/bookings/:id updates a booking and populates its package', async () => {
+  const input = { travelerName: 'Asha Rao Updated', package: 'package-1' }
+  const updatedBooking = { _id: 'booking-1', ...input }
+  let updateArguments
+  let checkedPackageId
+  let populatedField
+  const app = createApp({
+    TravelPackageModel: {
+      async exists(query) {
+        checkedPackageId = query._id
+        return { _id: query._id }
+      },
+    },
+    BookingModel: {
+      findByIdAndUpdate(...args) {
+        updateArguments = args
+        return {
+          populate(field) {
+            populatedField = field
+            return createQuery(updatedBooking)
+          },
+        }
+      },
+    },
+  })
+
+  await withServer(app, async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/api/bookings/booking-1`, {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(input),
+    })
+
+    assert.equal(response.status, 200)
+    assert.deepEqual(await response.json(), updatedBooking)
+    assert.deepEqual(updateArguments, [
+      'booking-1',
+      input,
+      { new: true, runValidators: true },
+    ])
+    assert.equal(checkedPackageId, input.package)
+    assert.equal(populatedField, 'package')
+  })
+})
+
+test('PUT /api/bookings/:id rejects an update with an unknown package', async () => {
+  let updateCalled = false
+  const app = createApp({
+    TravelPackageModel: {
+      async exists() {
+        return null
+      },
+    },
+    BookingModel: {
+      findByIdAndUpdate() {
+        updateCalled = true
+        return createQuery(null)
+      },
+    },
+  })
+
+  await withServer(app, async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/api/bookings/booking-1`, {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ package: 'missing-package' }),
+    })
+
+    assert.equal(response.status, 404)
+    assert.deepEqual(await response.json(), { error: 'Travel package not found' })
+    assert.equal(updateCalled, false)
+  })
+})
+
+test('PUT /api/bookings/:id returns 404 when the booking does not exist', async () => {
+  const app = createApp({
+    BookingModel: {
+      findByIdAndUpdate() {
+        return {
+          populate() {
+            return createQuery(null)
+          },
+        }
+      },
+    },
+  })
+
+  await withServer(app, async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/api/bookings/missing-booking`, {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ travelerName: 'Asha Rao Updated' }),
+    })
+
+    assert.equal(response.status, 404)
+    assert.deepEqual(await response.json(), { error: 'Booking not found' })
   })
 })
 
