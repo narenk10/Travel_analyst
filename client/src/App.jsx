@@ -13,15 +13,19 @@ function App() {
   const [region, setRegion] = useState('All regions')
   const [plannedOpportunities, setPlannedOpportunities] = useState([])
   const [selectedPackage, setSelectedPackage] = useState(null)
+  const [packageItems, setPackageItems] = useState(packages)
+  const [editingPackage, setEditingPackage] = useState(null)
+  const [editDraft, setEditDraft] = useState(null)
+  const [notice, setNotice] = useState('')
 
   const filteredPackages = useMemo(
     () =>
-      packages.filter((item) => {
+      packageItems.filter((item) => {
         const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase())
         const matchesRegion = region === 'All regions' || item.region === region
         return matchesSearch && matchesRegion
       }),
-    [region, search],
+    [packageItems, region, search],
   )
 
   const navigateTo = (page) => {
@@ -33,6 +37,39 @@ function App() {
     setPlannedOpportunities((current) =>
       current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
     )
+  }
+
+  const startEditingPackage = (item) => {
+    setEditingPackage(item)
+    setEditDraft({ ...item })
+    setNotice('')
+  }
+
+  const updateEditDraft = (event) => {
+    const { name, value } = event.target
+    setEditDraft((current) => ({ ...current, [name]: value }))
+  }
+
+  const savePackage = (event) => {
+    event.preventDefault()
+    const updatedPackage = { ...editDraft, score: Number(editDraft.score) }
+    setPackageItems((current) =>
+      current.map((item) => item.id === editingPackage.id ? updatedPackage : item),
+    )
+    setSelectedPackage((current) => current?.id === updatedPackage.id ? updatedPackage : current)
+    setNotice(`${updatedPackage.name} was updated.`)
+    setEditingPackage(null)
+    setEditDraft(null)
+  }
+
+  const deletePackage = (item) => {
+    if (!window.confirm(`Delete "${item.name}" from the package list?`)) {
+      return
+    }
+
+    setPackageItems((current) => current.filter((packageItem) => packageItem.id !== item.id))
+    setSelectedPackage((current) => current?.id === item.id ? null : current)
+    setNotice(`${item.name} was deleted.`)
   }
 
   return (
@@ -84,12 +121,16 @@ function App() {
 
           <PackageTable
             items={filteredPackages}
+            totalCount={packageItems.length}
             search={search}
             region={region}
             onSearch={setSearch}
             onRegionChange={setRegion}
             onSelect={setSelectedPackage}
+            onEdit={startEditingPackage}
+            onDelete={deletePackage}
           />
+          <p className="visually-hidden" role="status" aria-live="polite">{notice}</p>
           <footer className="footer-note">Travel Analyst <span>·</span> Insights for better journeys</footer>
         </section>
       </main>
@@ -113,6 +154,57 @@ function App() {
               <div><span>Satisfaction</span><strong>{selectedPackage.satisfaction} / 5</strong></div>
               <div><span>Value score</span><strong>{selectedPackage.score} / 100</strong></div>
             </div>
+          </section>
+        </div>
+      )}
+
+      {editingPackage && editDraft && (
+        <div className="modal-backdrop" onClick={() => setEditingPackage(null)} role="presentation">
+          <section
+            className="package-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="edit-package-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              className="modal-close"
+              type="button"
+              onClick={() => setEditingPackage(null)}
+              aria-label="Close edit form"
+            >×</button>
+            <p className="eyebrow">PACKAGE MANAGEMENT</p>
+            <h2 id="edit-package-title">Edit package</h2>
+            <form className="package-edit-form" onSubmit={savePackage}>
+              <label>
+                Package name
+                <input name="name" value={editDraft.name} onChange={updateEditDraft} required maxLength="120" />
+              </label>
+              <label>
+                Region
+                <input name="region" value={editDraft.region} onChange={updateEditDraft} required maxLength="80" />
+              </label>
+              <label>
+                Bookings
+                <input name="bookings" type="number" min="0" step="1" value={editDraft.bookings} onChange={updateEditDraft} required />
+              </label>
+              <label>
+                Revenue
+                <input name="revenue" value={editDraft.revenue} onChange={updateEditDraft} required maxLength="30" />
+              </label>
+              <label>
+                Satisfaction
+                <input name="satisfaction" type="number" min="0" max="5" step="0.1" value={editDraft.satisfaction} onChange={updateEditDraft} required />
+              </label>
+              <label>
+                Value score
+                <input name="score" type="number" min="0" max="100" step="1" value={editDraft.score} onChange={updateEditDraft} required />
+              </label>
+              <div className="edit-form-actions">
+                <button className="edit-cancel-button" type="button" onClick={() => setEditingPackage(null)}>Cancel</button>
+                <button className="edit-save-button" type="submit">Save changes</button>
+              </div>
+            </form>
           </section>
         </div>
       )}
