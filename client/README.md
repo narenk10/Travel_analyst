@@ -1,6 +1,6 @@
 # Travel Analyst frontend
 
-The React + Vite client presents a travel portfolio dashboard with reusable metric cards, a revenue trend chart, prioritized growth opportunities, and a searchable, region-filterable package table.
+The React + Vite client presents a travel portfolio dashboard with reusable metric cards, a revenue trend chart, prioritized growth opportunities, and a searchable, region-filterable package table. Packages can be edited or deleted from the table; these changes are held in React state for the current page session and reset on reload.
 
 ## Run locally
 

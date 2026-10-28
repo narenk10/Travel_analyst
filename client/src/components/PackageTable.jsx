@@ -1,4 +1,14 @@
-function PackageTable({ items, search, region, onSearch, onRegionChange, onSelect }) {
+function PackageTable({
+  items,
+  totalCount,
+  search,
+  region,
+  onSearch,
+  onRegionChange,
+  onSelect,
+  onEdit,
+  onDelete,
+}) {
   return (
     <section className="panel package-panel" id="packages" aria-labelledby="package-heading">
       <div className="table-heading">
@@ -29,18 +39,24 @@ function PackageTable({ items, search, region, onSearch, onRegionChange, onSelec
       <div className="table-scroll">
         <table>
           <thead>
-            <tr><th>PACKAGE</th><th>REGION</th><th>BOOKINGS</th><th>REVENUE</th><th>RATING</th><th>VALUE SCORE</th><th /></tr>
+            <tr><th>PACKAGE</th><th>REGION</th><th>BOOKINGS</th><th>REVENUE</th><th>RATING</th><th>VALUE SCORE</th><th>ACTIONS</th></tr>
           </thead>
           <tbody>
             {items.map((item) => (
-              <tr key={item.name}>
+              <tr key={item.id}>
                 <td><span className="package-avatar" aria-hidden="true">{item.name.charAt(0)}</span><strong>{item.name}</strong></td>
                 <td>{item.region}</td>
                 <td>{item.bookings}</td>
                 <td>{item.revenue}</td>
                 <td><span className="rating">★</span> {item.satisfaction}</td>
                 <td><span className="score-value">{item.score}</span><span className="score-track"><span style={{ width: `${item.score}%` }} /></span></td>
-                <td><button className="details-button" type="button" onClick={() => onSelect(item)}>Details <span aria-hidden="true">→</span></button></td>
+                <td>
+                  <div className="package-actions">
+                    <button className="details-button" type="button" onClick={() => onSelect(item)}>Details</button>
+                    <button className="details-button" type="button" onClick={() => onEdit(item)}>Edit</button>
+                    <button className="details-button delete-button" type="button" onClick={() => onDelete(item)}>Delete</button>
+                  </div>
+                </td>
               </tr>
             ))}
             {items.length === 0 && (
@@ -49,7 +65,7 @@ function PackageTable({ items, search, region, onSearch, onRegionChange, onSelec
           </tbody>
         </table>
       </div>
-      <p className="results-note">Showing {items.length} of 5 packages <span>·</span> Monthly data</p>
+      <p className="results-note">Showing {items.length} of {totalCount} packages <span>·</span> Monthly data</p>
     </section>
   )
 }
