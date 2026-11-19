@@ -353,6 +353,10 @@
   font-weight: 700;
 }
 
+.metric-change.negative {
+  color: #b64b4b;
+}
+
 .comparison {
   margin-left: 3px;
   color: #9aa39c;
