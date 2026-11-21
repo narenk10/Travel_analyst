@@ -7,7 +7,85 @@ import RevenueChart from './components/RevenueChart.jsx'
 import { metrics, opportunities, packages, revenue } from './data.js'
 import './App.css'
 
+function LoginScreen({ onLogin }) {
+  const [name, setName] = useState('')
+  const [error, setError] = useState('')
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    const trimmedName = name.trim()
+    if (!trimmedName) {
+      setError('Please enter your name.')
+      return
+    }
+
+    onLogin(trimmedName)
+  }
+
+  return (
+    <main className="login-screen">
+      <section className="login-story" aria-labelledby="login-story-heading">
+        <a className="login-brand" href="/" aria-label="Travel Analyst home">
+          <span className="brand-mark">T</span>
+          <span>Travel<span className="brand-light"> Analyst</span></span>
+        </a>
+        <div className="login-story-copy">
+          <p className="eyebrow">TRAVEL PRODUCT OPTIMIZATION</p>
+          <h1 id="login-story-heading">Make every journey a better opportunity.</h1>
+          <p>Bring your portfolio into focus and find the signals that move your travel business forward.</p>
+        </div>
+        <div className="login-story-note">
+          <span className="login-story-sparkle" aria-hidden="true">✦</span>
+          <span>Insights for better journeys</span>
+        </div>
+      </section>
+
+      <section className="login-card" aria-labelledby="login-heading">
+        <p className="eyebrow">WELCOME TO YOUR WORKSPACE</p>
+        <h2 id="login-heading">Sign in</h2>
+        <p className="login-subtitle">Enter your name and password to continue.</p>
+        <form className="login-form" onSubmit={handleSubmit}>
+          <label htmlFor="login-name">Name</label>
+          <input
+            autoComplete="username"
+            autoFocus
+            id="login-name"
+            maxLength="120"
+            name="name"
+            onChange={(event) => {
+              setName(event.target.value)
+              setError('')
+            }}
+            placeholder="Your name"
+            required
+            type="text"
+            value={name}
+          />
+
+          <label htmlFor="login-password">Password</label>
+          <input
+            autoComplete="current-password"
+            id="login-password"
+            maxLength="128"
+            name="password"
+            placeholder="Your password"
+            required
+            type="password"
+          />
+
+          {error && <p className="login-error" role="alert">{error}</p>}
+          <button className="login-submit" type="submit">Continue <span aria-hidden="true">→</span></button>
+        </form>
+        <p className="login-demo-note">
+          Demo sign-in only. Any non-empty name and password will continue; credentials are not verified.
+        </p>
+      </section>
+    </main>
+  )
+}
+
 function App() {
+  const [signedInName, setSignedInName] = useState('')
   const [activePage, setActivePage] = useState('Overview')
   const [search, setSearch] = useState('')
   const [region, setRegion] = useState('All regions')
@@ -72,6 +150,10 @@ function App() {
     setNotice(`${item.name} was deleted.`)
   }
 
+  if (!signedInName) {
+    return <LoginScreen onLogin={setSignedInName} />
+  }
+
   return (
     <div className="app-shell">
       <Navigation activePage={activePage} onNavigate={navigateTo} />
@@ -81,7 +163,8 @@ function App() {
           <div className="user-profile">
             <span className="status-dot" aria-hidden="true" />
             <span>All systems operational</span>
-            <span className="avatar" aria-label="Naren">N</span>
+            <span className="avatar" aria-label={signedInName}>{signedInName.charAt(0).toUpperCase()}</span>
+            <button className="sign-out-button" onClick={() => setSignedInName('')} type="button">Sign out</button>
           </div>
         </header>
 
@@ -89,7 +172,7 @@ function App() {
           <div className="page-heading">
             <div>
               <p className="eyebrow">MONDAY, 26 OCTOBER 2026</p>
-              <h1>Good morning, Naren <span aria-hidden="true">✦</span></h1>
+              <h1>Good morning, {signedInName} <span aria-hidden="true">✦</span></h1>
               <p className="subtitle">Here&apos;s how your travel portfolio is performing this month.</p>
             </div>
             <button className="button button-primary" onClick={() => navigateTo('Opportunities')} type="button">
