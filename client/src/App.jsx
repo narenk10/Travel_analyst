@@ -9,10 +9,17 @@ import './App.css'
 
 function LoginScreen({ onLogin }) {
   const [name, setName] = useState('')
+  const [error, setError] = useState('')
 
   const handleSubmit = (event) => {
     event.preventDefault()
-    onLogin(name.trim())
+    const trimmedName = name.trim()
+    if (!trimmedName) {
+      setError('Please enter your name.')
+      return
+    }
+
+    onLogin(trimmedName)
   }
 
   return (
@@ -45,7 +52,10 @@ function LoginScreen({ onLogin }) {
             id="login-name"
             maxLength="120"
             name="name"
-            onChange={(event) => setName(event.target.value)}
+            onChange={(event) => {
+              setName(event.target.value)
+              setError('')
+            }}
             placeholder="Your name"
             required
             type="text"
@@ -63,6 +73,7 @@ function LoginScreen({ onLogin }) {
             type="password"
           />
 
+          {error && <p className="login-error" role="alert">{error}</p>}
           <button className="login-submit" type="submit">Continue <span aria-hidden="true">→</span></button>
         </form>
         <p className="login-demo-note">

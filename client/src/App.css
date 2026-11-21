@@ -1117,6 +1117,12 @@ select:focus-visible {
   outline: 0;
 }
 
+.login-error {
+  margin: -7px 0 12px;
+  color: #a9352b;
+  font-size: 11px;
+}
+
 .login-submit {
   display: flex;
   min-height: 44px;
